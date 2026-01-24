@@ -1,53 +1,18 @@
-import base64
-import asyncio
-import random
-from datetime import datetime, timedelta
-
-# ===================== ШИФРОВАНИЕ ТОКЕНА =====================
-class SecureStorage:
-    def __init__(self, key: str):
-        self.key = key
-    
-    def encrypt(self, text: str) -> str:
-        encrypted = []
-        key_len = len(self.key)
-        for i, char in enumerate(text):
-            key_char = self.key[i % key_len]
-            encrypted_char = chr(ord(char) ^ ord(key_char))
-            encrypted.append(encrypted_char)
-        return base64.b64encode(''.join(encrypted).encode()).decode()
-    
-    def decrypt(self, encrypted_text: str) -> str:
-        decoded = base64.b64decode(encrypted_text).decode()
-        result = []
-        key_len = len(self.key)
-        for i, char in enumerate(decoded):
-            key_char = self.key[i % key_len]
-            result.append(chr(ord(char) ^ ord(key_char)))
-        return ''.join(result)
-
-# Ключ шифрования
-CRYPTO_KEY = "BOTNET_SECURE_2024"
-secure = SecureStorage(CRYPTO_KEY)
-
-# Зашифрованный токен бота
-ENCR_BOT_TOKEN = "eAQRGx4fAgkAFw8dARZcAgAACAJdDAcBXwBRGRsIBwUGEQgCAVgGFxU="
-
-# Расшифровка токена при запуске
-BOT_TOKEN = secure.decrypt(ENCR_BOT_TOKEN)
-
-# ===================== ОСНОВНОЙ КОД =====================
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.filters import Command
+from datetime import datetime, timedelta
+import asyncio
+import random
 
+BOT_TOKEN = "8008873803:AAGPpdYXF3lLpsp9kGktwZ030ejAUxtF86U"
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
 users_db = {}
 ADMIN_IDS = [118272062]
 
-# Планы без шифрования ссылок
+# Обновленные планы с индивидуальными платежными ссылками
 plans = {
     "1day": {
         "price": 0.5, 
@@ -106,7 +71,6 @@ def add_warning(user_id):
 
 @dp.message(Command("start"))
 async def start(msg: types.Message):
-    # Контакты создателя без шифрования
     text = "🚀 BOTNET SYSTEM\nСоздатель: @utsearch\nПомощь: @utsearch"
     await msg.answer(text, reply_markup=main_menu(msg.from_user.id))
 
@@ -187,7 +151,7 @@ async def send_complaints_progress(message: types.Message, reason: str):
         reply_markup=main_menu(message.chat.id)
     )
 
-# === СИСТЕМА ОПЛАТЫ ===
+# === ОБНОВЛЕННАЯ СИСТЕМА ОПЛАТЫ С ИНДИВИДУАЛЬНЫМИ ССЫЛКАМИ ===
 @dp.callback_query(F.data == "subscribe")
 async def subscribe(call: types.CallbackQuery):
     kb = InlineKeyboardMarkup(inline_keyboard=[
@@ -239,11 +203,15 @@ async def select_subscription(call: types.CallbackQuery):
 async def check_payment(call: types.CallbackQuery):
     sub_type = call.data.replace("check_payment_", "")
     
+    # Имитация проверки платежа
     await call.answer("🔍 Проверяем платеж...", show_alert=False)
     
+    # Задержка для имитации проверки
     await asyncio.sleep(2)
     
+    # 70% шанс успешной оплаты (в реальном боте - реальная проверка)
     if random.random() < 0.7:
+        # "Успешная" оплата
         user = get_user(call.from_user.id)
         user["sub_end"] = datetime.now() + timedelta(days=plans[sub_type]["days"])
         
