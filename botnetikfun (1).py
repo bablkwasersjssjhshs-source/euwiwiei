@@ -13,9 +13,7 @@ ADMIN_IDS = [118272062]
 
 def main_menu(user_id):
     kb = [
-        # 1 кнопка сверху
         [InlineKeyboardButton(text="DSA", callback_data="dsa")],
-        # 2 кнопки снизу (слева и справа)
         [
             InlineKeyboardButton(text="ПРОФИЛЬ", callback_data="profile"),
             InlineKeyboardButton(text="ПОДПИСКА", callback_data="subscribe")
@@ -54,10 +52,15 @@ async def profile(call: types.CallbackQuery):
     user = get_user(call.from_user.id)
     sub_active = has_sub(call.from_user.id)
     username = f"@{call.from_user.username}" if call.from_user.username else "Нет"
+    
+    sub_info = "Нет"
+    if sub_active and user["sub_end"]:
+        sub_info = f"До {user['sub_end'].strftime('%d.%0m.%Y %H:%M')}"
+
     text = f"""ПРОФИЛЬ
 ID: {call.from_user.id}
 Юзернейм: {username}
-Подписка: {'Да' if sub_active else 'Нет'}
+Подписка: {sub_info}
 Варнов: {user['warnings']}/3"""
     await call.message.edit_text(text, reply_markup=main_menu(call.from_user.id))
 
@@ -164,10 +167,29 @@ async def givesub_cmd(msg: types.Message):
         target_id = int(args[1])
         days = int(args[2])
         user = get_user(target_id)
-        user["sub_end"] = datetime.now() + timedelta(days=days)
-        await msg.answer(f"Подписка выдана {target_id} на {days} дней")
-    except:
-        await msg.answer("Ошибка")
+        
+        # Вычисляем дату окончания
+        end_date = datetime.now() + timedelta(days=days)
+        user["sub_end"] = end_date
+        
+        formatted_date = end_date.strftime("%d.%m.%Y в %H:%M")
+        
+        await msg.answer(f"Подписка выдана пользователю {target_id} на {days} дней. Активна до: {formatted_date}")
+        
+        # Пытаемся отправить уведомление самому пользователю об активации
+        try:
+            await bot.send_message(
+                target_id,
+                f"Ваша подписка успешно активирована!\n"
+                f"Срок: {days} дней\n"
+                f"Действует до: {formatted_date}",
+                reply_markup=main_menu(target_id)
+            )
+        except:
+            pass
+            
+    except Exception as e:
+        await msg.answer(f"Ошибка: {e}")
 
 @dp.callback_query(F.data == "admin")
 async def admin_panel(call: types.CallbackQuery):
@@ -211,3 +233,4 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+    
