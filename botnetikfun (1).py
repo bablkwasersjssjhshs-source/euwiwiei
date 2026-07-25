@@ -72,8 +72,8 @@ async def dsa_callback(call: types.CallbackQuery):
     
     await call.message.edit_text(
         "Введите юзернейм цели:\n"
-        "Пример: @username или https://t.me/username\n\n"
-        "ВНИМАНИЕ: Нельзя сносить аккаунты старше 5 лет!",
+        "Пример: @username"
+        "ВНИМАНИЕ: Нельзя сносить аккаунты старше 3 лет за нарушение будет выдан варн",
         parse_mode="HTML"
     )
 
