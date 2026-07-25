@@ -1,4 +1,4 @@
-from aiogram import Bot, Dispatcher, types, F
+From aiogram import Bot, Dispatcher, types, F
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.filters import Command
 from datetime import datetime, timedelta
@@ -234,3 +234,5 @@ async def main():
 if __name__ == "__main__":
     asyncio.run(main())
     
+
+добавь в бота данное меню и добавь такие же кнопки как на скрине кроме флуда кодами,реснуть аккаунт и меню зеркал
